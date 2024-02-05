@@ -29,14 +29,11 @@ app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY')
 
 key = Fernet.generate_key()
-print(key)
 cipher_suite = Fernet(key)
-print(cipher_suite)
 socketio = SocketIO(app)
 
 postgre_user = os.environ.get('DB_USER')
 postgre_password = os.environ.get('DB_PASSWORD')
-print(postgre_password)
 
 # Configure PostgreSQL
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{postgre_user}:{postgre_password}@database-1.cr64q8k6qvk2.us-east-1.rds.amazonaws.com'
@@ -86,7 +83,6 @@ with app.app_context():
 
 mongo_user=os.environ.get('MONGO_USER')
 mongo_password=os.environ.get('MONGO_PASSWORD')
-print(mongo_user)
 
 client = MongoClient(f'mongodb+srv://{mongo_user}:{mongo_password}@my-cluster.xeffwni.mongodb.net/?retryWrites=true&w=majority')
 mongo_db = client['sample-db']
