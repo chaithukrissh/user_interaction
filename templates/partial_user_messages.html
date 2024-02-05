@@ -1,0 +1,13 @@
+<ul id="messages-list">
+    {% for message in messages %}
+        {% if message.sender_id == logged_in_user_id %}
+            <li class="sender" style="background-color: #d9e7d9;">
+                You: {{ message.content }}
+            </li>
+        {% else %}
+            <li class="receiver" style="background-color: #b6b4e8;">
+                {{ message.sender.username }}: {{ message.content }}  
+            </li>
+        {% endif %}
+    {% endfor %}
+</ul>

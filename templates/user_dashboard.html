@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin-top: 20px;
+        }
+
+        /* Additional styles as needed */
+
+    </style>
+</head>
+<body>
+    <h1>User Dashboard</h1>
+
+
+    <h2>Messages</h2>
+    <ul>
+        {% for message in messages %}
+            <li>{{ message.sender.username }}: {{ message.content }} ({{ message.timestamp.strftime('%Y-%m-%d %H:%M:%S') }})</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Form to Send Messages -->
+    <form method="post" action="{{ url_for('send_message', receiver_id=user.id) }}">
+        <textarea name="content" placeholder="Type your message"></textarea>
+        <button type="submit">Send</button>
+    </form>
+    
+    <!-- {% if user %}
+        <p>User ID: {{ user.id }}</p>
+        {% if user_posts %}
+            <h2>User's Posts</h2>
+            <ul>
+                {% for post in user_posts %}
+                <li>
+                    
+                    {% if post.get('photo') %}
+                        <img src="{{ url_for('show_photo', photo_id=post['_id']) }}" alt="User Post Image">
+                    {% else %}
+                        <p>No image available</p>
+                    {% endif %}
+                    <p>Likes: {{ post.get('likes', 0) }}</p>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No posts yet.</p>
+        {% endif %}
+    {% else %}
+        <p>User not found.</p>
+    {% endif %} -->
+    
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+</body>
+</html>
+
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 20px;
+        }
+
+        img {
+            max-width: 50%;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 35px;
+        }
+
+        p {
+            margin-top: 20px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Add more styles if needed */
+
+    </style>
+</head>
+<body>
+    <h1>User Dashboard</h1>
+    {% if user %}
+        <p>User ID: {{ user.id }}</p>
+        <h2>User's Posts</h2>
+        {% if user_posts %}
+            <ul>
+                {% for post in user_posts %}
+                    <li>
+                        <p>{{ post.get('content', 'No content') }}</p>
+                        {% if post.get('photo') %}
+                        <img src="{{ url_for('show_photo', photo_id=post['_id']) }}" alt="User Post Image">
+                        {% else %}
+                            <p>No image</p>
+                        {% endif %}
+                        <p>Likes: {{ post.get('likes', 0) }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No posts yet.</p>
+        {% endif %}
+    {% else %}
+        <p>User not found.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+</body>
+</html> -->
+
+

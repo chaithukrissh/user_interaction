@@ -1,0 +1,8 @@
+flask
+flask_sqlalchemy
+flask_pymongo
+pika
+pillow
+passlib
+flask_socketio
+psycopg2-binary

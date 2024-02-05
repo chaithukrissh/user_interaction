@@ -1,0 +1,410 @@
+<!-- templates/user_messages.html -->
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }} Messages</title>
+    
+</head>
+<body>
+    <h1>Messages for {{ user.username }}</h1>
+    
+    <ul>
+        {% for message in messages %}
+            <li>
+                {{ message.content }}
+            </li>
+        {% endfor %}
+    </ul>
+
+</body> 
+</html> -->
+
+<!-- templates/user_messages.html -->
+
+
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ user.username }} Messages</title>
+    <script>
+        // Function to reload the page every 2 seconds
+        function refreshPage() {
+            location.reload();
+        }
+
+        // Refresh the page every 2000 milliseconds (2 seconds)
+        setInterval(refreshPage, 2000);
+    </script>  
+    
+</head>
+<body>
+    <h1>Messages for {{ user.username }}</h1>
+    
+    <ul>
+        {% for message in messages %}
+            <li>
+                {{ message.content }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    <h2>Send a Message</h2>
+    <form method="post" action="{{ url_for('send_message', user_id=user.id) }}">
+        <textarea name="message_content" placeholder="Type your message here" required></textarea>
+        <button type="submit">Send</button>
+        <a href="{{ url_for('messages') }}">Go back to Messages</a>
+    </form>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js"></script>
+<script>
+    var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+    socket.on('connect', function() {
+        var user_id = '{{ user.id }}';
+        socket.emit('join', { user_id: user_id });
+    });
+
+    socket.on('update_messages', function(data) {
+        // Handle the received messages and update the UI
+        var messages = data.messages;
+        // Update the UI with the new messages...
+    });
+</script>
+
+    
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+
+        @media only screen and (max-width: 768px) {
+                    /* Mobile-specific styles go here */
+
+                    /* For example, you might want to stack messages vertically on small screens */
+                    .message-container li {
+                        display: inline-block;
+                        width: 100%;
+                    }
+
+                    /* Adjust other styles as needed for a better mobile experience */
+                }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0; /* Remove default margin */
+            display: flex;
+            /* text-align: center; */
+            flex-direction: column;
+            min-height: 100vh; /* Make sure the body takes at least the full height of the viewport */
+        }
+
+        .message-container {
+            overflow: auto;
+            flex-grow: 1; /* Allow the message-container to take up remaining vertical space */
+            max-height: 50vh; /* Set a maximum height of 50% of the viewport height */
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sender,
+        .receiver {
+            padding: 5px;
+            margin-bottom: 5px;
+            border-radius: 10px;
+            max-width: 95%; /* Limit the width to 70% */  /* my width is 30 */
+            word-wrap: break-word; /* Allow long words to be broken and wrap to the next line */
+        }
+
+        .sender {
+            text-align: right;
+            background-color: #c1e0c1;
+        }
+
+        .receiver {
+            text-align: left;
+            background-color: #c1e0c1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Messages with {{ user.username }}</h1>
+    
+    <div class="message-container" id="message-container">
+        <ul id="messages-list">
+            {% for message in messages %}
+                {% if message.sender_id == logged_in_user_id %}
+                    <li class="sender" style="background-color: #d9e7d9;">
+                        You: {{ message.content }}
+                    </li>
+                {% else %}
+                    <li class="receiver" style="background-color: #b6b4e8;">
+                        {{ message.sender.username }}: {{ message.content }}  
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+
+    <h2>Send a Message</h2>
+    <form id="message-form" method="post" action="{{ url_for('send_message', user_id=user.id) }}">
+        <textarea name="message_content" placeholder="Type your message here" required></textarea>
+        <button type="submit">Send</button><br>
+        <a href="{{ url_for('messages') }}">Go back to Messages</a>
+        <br><br><br>
+    </form>
+    <div id="message-updates" style="display: none;"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+        var shouldScrollToBottom = true;
+        // Function to update messages
+        function updateMessages() {
+            var currentScrollTop = $('#message-container').prop('scrollTop');
+            $.get('{{ url_for('user_messages', user_id=user.id) }}', function(response) {
+                // console.log('AJAX Response:', response);
+                if (response && response.html) 
+                {
+
+                    // var currentScrollHeight = $('#message-container').prop('scrollHeight');
+
+                    // Update messages container with new content
+                    $('#message-container').html(response.html);
+                    // $('#message-container').scrollTop(currentScrollTop);
+                    if (shouldScrollToBottom) {
+                        $('#message-container').scrollTop($('#message-container').prop('scrollHeight'));
+                    } else {
+                        // Otherwise, set the scroll position to the previous position
+                        $('#message-container').scrollTop(currentScrollTop);
+                    }
+
+                    // Get the new scroll height after updating
+                    // var newScrollHeight = $('#message-container').prop('scrollHeight');
+
+                    // Calculate the difference in scroll height
+                    // var scrollHeightDifference = newScrollHeight - currentScrollHeight;
+
+                    // Scroll to the bottom only if the user is already at the bottom
+                    // if (scrollHeightDifference > 0 && currentScrollHeight + $('#message-container').prop('clientHeight') >= newScrollHeight) {
+                    //     $('#message-container').scrollTop(newScrollHeight);
+                    // }
+                    // $('#message-container').html(response.html);
+                    // var messageContainer = document.getElementById('message-container');
+                    // messageContainer.scrollTop = messageContainer.scrollHeight;
+
+                } else {
+                    console.error('Invalid or empty response:', response);
+                }
+            }).fail(function() {
+                console.error('Failed to fetch messages.');
+            });
+        }
+    
+        // Initial load
+        updateMessages();
+    
+        // Set interval to update messages every 3 seconds
+        setInterval(updateMessages, 5000);
+        socket.on('message_update', function(data) {
+            // Update messages when a new message is received in real-time
+            updateMessages();
+        });
+    </script>
+
+    <!-- <script>
+    // Function to update messages
+    function getMessages() {
+        $.ajax({
+            type: "GET",
+            url: "/user_messages/{{ user.id }}",  // Replace with the actual Flask route
+            dataType: 'json',  // Specify that you expect JSON in the response
+        })
+        .done(function(response) {
+            // Assuming the response contains the JSON array of messages
+            var messagesHtml = response.messages.map(function(message) {
+                return '<li>' + message.content + '</li>';
+            }).join('');
+            
+            $('#user_messages').html(messagesHtml);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            console.log("Error: " + errorThrown);
+        })
+        .always(function() {
+            // Set a timeout to call getMessages every 5 seconds
+            setTimeout(function() {
+                getMessages();
+            }, 2000);
+        });
+    }
+
+    // Call the function when the document is ready
+    $(document).ready(function() {
+        getMessages();
+    });
+
+
+</script> -->
+    
+    <!-- <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        
+        function updateMessages(messages) {
+            var messageContainer = $('#message-container ul');
+
+            messages.forEach(function(message) {
+                messageContainer.append('<li class="receiver">' + message.content + '</li>');
+            });
+        }
+        setInterval(updateMessages, 2000);
+    </script> -->
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        body {
+        font-family: Arial, sans-serif;
+        margin: 0; /* Remove default margin */
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Make sure the body takes at least the full height of the viewport */
+        }
+
+        .message-container {
+            overflow: auto;
+            flex-grow: 1; /* Allow the message-container to take up remaining vertical space */
+            max-height: 50vh; /* Set a maximum height of 50% of the viewport height */
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+
+        .sender,
+        .receiver {
+            padding: 5px;
+            margin-bottom: 5px;
+            border-radius: 10px;
+            max-width: 50%; /* Limit the width to 70% */
+            word-wrap: break-word; /* Allow long words to be broken and wrap to the next line */
+        }
+
+        .sender {
+            text-align: left;
+            background-color: #e0e0e0;
+        }
+
+        .receiver {
+            text-align: left;
+            background-color: #c1e0c1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Messages for {{ user.username }}</h1>
+    
+    <div class="message-container">
+        <ul>
+            {% for message in messages %}
+                {% if message.sender_id == user_id %}
+                    <li class="sender">
+                        {{ message.content }}
+                    </li>
+                {% else %}
+                    <li class="receiver">
+                        {{ message.content }}
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+
+    <h2>Send a Message</h2>
+    <form method="post" action="{{ url_for('send_message', user_id=user.id) }}">
+        <textarea name="message_content" placeholder="Type your message here" required></textarea>
+        <button type="submit">Send</button>
+        <a href="{{ url_for('messages') }}">Go back to Messages</a>
+    </form>
+
+    <script>
+        // Function to update messages
+        function updateMessages() {
+            // Fetch messages using AJAX
+            $.ajax({
+                url: "{{ url_for('user_messages', user_id=user.id) }}",
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // Update the messages on success
+                    updateMessages(data.messages);
+                },
+                error: function(error) {
+                    console.error('Error fetching messages:', error);
+                }
+            });
+        }
+
+        // Periodically update messages every 2 seconds (adjust as needed)
+        setInterval(updateMessages, 2000);
+    </script>
+
+
+</body>
+</html> -->

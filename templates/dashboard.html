@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+
+        @media only screen and (max-width: 768px) {
+                            /* Mobile-specific styles go here */
+
+                            /* For example, you might want to stack messages vertically on small screens */
+                            .message-container li {
+                                display: inline-block;
+                                width: 100%;
+                            }
+
+                            /* Adjust other styles as needed for a better mobile experience */
+                        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 20px;
+        }
+
+        img {
+            max-width: 50%;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 35px;
+        }
+
+        p {
+            margin-top: 20px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Styles for the Upload button */
+        .upload-button {
+            position: absolute;
+            top: 40px;  /* 140 , 1180 */
+            right: 1180px;
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .messages-button {
+        position: absolute;
+        top: 40px;
+        right: 1050px;
+        background-color: #28a745;
+        color: #fff;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        }
+
+        .upload-button:hover {
+            background-color: #218838;
+        }
+
+        /* Styles for the Like button */
+
+
+        .like-container {
+            position: relative;
+            /* top: 10px;
+            left: 10px; */
+        }
+
+        .like-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            /* position: absolute; */
+            bottom: 5px;
+        }
+
+
+        .photo-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+
+        .flash-message {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px;
+            background-color: #21ac21;
+            color: #fff;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .like-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    
+    <!-- Upload button in the top right corner -->
+    <a href="{{ url_for('upload_photo') }}" class="upload-button">Upload</a>
+    <a href="{{ url_for('messages') }}" class="messages-button"> Message </a>   
+
+    {% if user_photos %}
+        <h2>Your Photos</h2>
+        <ul>
+            {% for photo in user_photos %}
+                <li class="photo-container">
+                    <img src="{{ url_for('show_photo', photo_id=photo['photo_id']) }}" alt="User Photo">
+                    <div class="like-container">
+                        <p>Likes: {{ photo.likes }}</p>
+                        
+                        <button class="like-button" onclick="likePhoto('{{ session['user_id'] }}', '{{ photo['photo_id'] }}')">Like</button>
+                       
+                        <div class="flash-message" id="flash-message-{{ photo['photo_id'] }}"></div>
+                    </div>
+                </li>
+
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No photos yet. <a href="{{ url_for('upload_photo') }}">Upload a photo</a>.</p>
+    {% endif %}
+    
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+
+    <script>
+
+        function likePhoto(userId, photoId) {
+            fetch(`/like_photo/${photoId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to like photo');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log(data);
+                    const flashMessage = document.getElementById(`flash-message-${photoId}`);
+                    flashMessage.innerText = `${userId} liked this photo`;
+                    flashMessage.style.display = 'block';
+
+                    setTimeout(() => {
+                        flashMessage.style.display = 'none';
+                    }, 3000);
+                })
+                .catch(error => {
+                    console.error('Failed to like photo', error);
+                });
+        }
+    </script>
+</body>
+</html>
+

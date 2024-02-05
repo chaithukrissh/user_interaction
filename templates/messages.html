@@ -1,0 +1,54 @@
+<!-- templates/messages.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages</title>
+    <!-- Add your CSS styling here -->
+    <style>
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        button {
+            background-color: #add8e6; /* Light blue color */
+            margin-bottom: 10px; /* Add some margin for separation */
+            padding: 8px; /* Adjust padding for better appearance */
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Messages</h1>
+    
+    <ul >
+        {% for user in users %}
+            <li>
+                <button onclick="redirectToUserMessages('{{ url_for('user_messages', user_id=user.id) }}')">
+                    {{ user.username }}
+                </button>
+                <!-- <a href="{{ url_for('user_messages', user_id=user.id) }}">{{ user.username }}</a>
+                <button onclick="sendMessage('{{ user.id }}')">Send Message</button> -->
+            </li>
+        {% endfor %}
+    </ul>
+    <button onclick="redirectToUserMessages('{{ url_for('dashboard') }}')">
+        Dashboard
+    </button>
+            <!-- <a href="{{ url_for('dashboard') }}">Dashboard</a> -->
+
+    <script>
+      
+        function redirectToUserMessages(url) {
+            window.location.href = url;
+        }
+  
+    </script>
+
+    <!-- Add your additional HTML and styling here -->
+</body>
+</html>
