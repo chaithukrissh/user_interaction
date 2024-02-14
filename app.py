@@ -45,7 +45,7 @@ postgre_password = os.environ.get('DB_PASSWORD')
 
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{postgre_user}:{postgre_password}@database-1.cr64q8k6qvk2.us-east-1.rds.amazonaws.com'
-# app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:Chaithu143@database-1.cr64q8k6qvk2.us-east-1.rds.amazonaws.com'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 
