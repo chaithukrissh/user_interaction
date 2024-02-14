@@ -1,0 +1,11 @@
+.title-bar {
+    display: flex;
+    align-items: last baseline;
+    padding: 10px;
+    background-color: #ecb8b8; /* Example background color */
+}
+
+.title-bar img {
+    max-width: 30px; /* Adjust the max-width as needed */
+    margin-right: 0px; /* Add spacing between logo and title */
+}

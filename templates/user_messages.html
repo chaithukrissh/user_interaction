@@ -228,7 +228,7 @@
         updateMessages();
     
         // Set interval to update messages every 3 seconds
-        setInterval(updateMessages, 5000);
+        setInterval(updateMessages, 2000);
         socket.on('message_update', function(data) {
             // Update messages when a new message is received in real-time
             updateMessages();

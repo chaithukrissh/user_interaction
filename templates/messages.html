@@ -13,6 +13,19 @@
             padding: 0;
         }
 
+        .dashboard-button {
+            position: absolute;
+            top: 20px;  /* 140 , 1180 */
+            right: 30px;
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
         button {
             background-color: #add8e6; /* Light blue color */
             margin-bottom: 10px; /* Add some margin for separation */
@@ -24,6 +37,7 @@
 </head>
 <body>
     <h1>Messages</h1>
+    <a href="{{ url_for('dashboard') }}" class="dashboard-button">Dashboard</a>
     
     <ul >
         {% for user in users %}
@@ -36,9 +50,9 @@
             </li>
         {% endfor %}
     </ul>
-    <button onclick="redirectToUserMessages('{{ url_for('dashboard') }}')">
-        Dashboard
-    </button>
+    <!-- <button onclick="redirectToUserMessages('{{ url_for('dashboard') }}')"> -->
+        <!-- Dashboard
+    </button> -->
             <!-- <a href="{{ url_for('dashboard') }}">Dashboard</a> -->
 
     <script>

@@ -20,6 +20,8 @@ from cryptography.fernet import InvalidToken
 from flask_socketio import SocketIO, emit
 from flask_socketio import join_room, leave_room
 import os
+from twilio.rest import Client
+from sqlalchemy import Column, Integer, String, Date
 
 
 
@@ -32,11 +34,18 @@ key = Fernet.generate_key()
 cipher_suite = Fernet(key)
 socketio = SocketIO(app)
 
+######################### TWILIO DETAILS ##############################
+account_sid = 'AC2b4c4c92e979713e90703eee66c4a603'
+auth_token = os.environ.get('TWILIO_AUTH')
+twilio_client = Client(account_sid, auth_token)
+######################### TWILIO DETAILS ##############################
+
 postgre_user = os.environ.get('DB_USER')
 postgre_password = os.environ.get('DB_PASSWORD')
 
-# Configure PostgreSQL
+
 app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://{postgre_user}:{postgre_password}@database-1.cr64q8k6qvk2.us-east-1.rds.amazonaws.com'
+# app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql://postgres:Chaithu143@database-1.cr64q8k6qvk2.us-east-1.rds.amazonaws.com'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 
@@ -47,6 +56,9 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
+    dob = db.Column(db.Date)  # Date of Birth field
+    phone_number = db.Column(db.String(15))
+    email = Column(String(120), unique=True, nullable=False)
 
     # Define a one-to-many relationship with the 'posts' table
     posts = relationship('Post', backref='user', lazy=True)
@@ -84,13 +96,13 @@ with app.app_context():
 mongo_user=os.environ.get('MONGO_USER')
 mongo_password=os.environ.get('MONGO_PASSWORD')
 
-client = MongoClient(f'mongodb+srv://{mongo_user}:{mongo_password}@my-cluster.xeffwni.mongodb.net/?retryWrites=true&w=majority')
+client = MongoClient(f"mongodb+srv://{mongo_user}:{mongo_password}@my-cluster.xeffwni.mongodb.net/?retryWrites=true&w=majority")
 mongo_db = client['sample-db']
 photos_collection = mongo_db['sample-col']
 
-# client=MongoClient('localhost')
-# mongo_db=client['admin']
-# photos_collection = mongo_db['sample-col']
+#client=MongoClient('localhost')
+#mongo_db=client['admin']
+#photos_collection = mongo_db['sample-col']
 
 
 
@@ -131,6 +143,7 @@ def login():
         # if user and check_password_hash(user.password, password):
         if user and sha256_crypt.verify(password, hash_pass):
             session['user_id'] = user.id
+            session['user_name'] = user.username
             flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
         else:
@@ -144,14 +157,22 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        dob = datetime.strptime(request.form['dob'], '%Y-%m-%d')  # Convert DOB string to datetime object
+        phone_number = request.form['phone_number']
+        email=request.form['email']
 
         hashed_password = sha256_crypt.hash(password) #generate_password_hash(password, method='sha256')
-        new_user = User(username=username, password=hashed_password)
+        new_user = User(username=username, password=hashed_password , dob=dob, phone_number=phone_number , email=email)
 
         db.session.add(new_user)
         db.session.commit()
 
         flash('Registration successful!', 'success')
+        message = twilio_client.messages.create(
+            from_='whatsapp:+14155238886',
+            body=f"user {username} registered succesfully !",
+            to='whatsapp:+919347918594'
+        )
         return redirect(url_for('login'))
 
     return render_template('register.html')
@@ -220,7 +241,7 @@ def upload_photo():
                     # If successfully opened, it's a valid image
                     # Now, you can use 'img' for further processing or store it in the database
                     # For example, assuming photos_collection is your MongoDB collection
-                    photo_id = photos_collection.insert_one({'photo': image_content.getvalue(), 'user_id': session['user_id']}).inserted_id
+                    photo_id = photos_collection.insert_one({'photo': image_content.getvalue(), 'user_id': session['user_id'] , 'user_name':session['user_name']}).inserted_id
 
                     flash('Photo uploaded successfully!', 'success')
                     return redirect(url_for('dashboard'))
@@ -234,6 +255,17 @@ def upload_photo():
 
     # If it's a GET request, render the HTML form for photo upload
     return render_template('upload.html')
+
+############### To display all images #################################
+@app.route('/images')
+def display_images():
+    # Retrieve all images from MongoDB
+    all_photos = photos_collection.find()
+
+    # Render template and pass images to it
+    return render_template('all_images.html', photos=all_photos)
+
+############### To display all images #################################
 
 
 @app.route('/delete/<photo_id>', methods=['POST'])
@@ -260,7 +292,7 @@ def show_photo(photo_id):
     photo_id_object = ObjectId(photo_id)
 
     # Find the photo in the collection based on its ObjectId
-    photo_data = photos_collection.find_one({'_id': photo_id_object, 'user_id': session.get('user_id')})
+    photo_data = photos_collection.find_one({'_id': photo_id_object }) #, 'user_id': session.get('user_id')
 
     if photo_data:
         # Assuming 'photo' is the field in your collection storing binary photo data
@@ -353,7 +385,7 @@ def user_messages(user_id):
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, host="0.0.0.0" , port=5000)
 
 
 

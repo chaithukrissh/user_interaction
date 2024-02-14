@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Photos</title>
+    <style>
+        .photo {
+            margin-bottom: 30px;
+        }
+        .photo img {
+            max-width: 400px;  /* Set maximum width */
+            max-height: 400px; /* Set maximum height */
+        }
+        .dashboard-button {
+            position: absolute;
+            top: 20px;  /* 140 , 1180 */
+            right: 30px;
+            background-color: #28a745;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>TEAM</h1>
+    <a href="{{ url_for('dashboard') }}" class="dashboard-button">Dashboard</a>
+    <div class="photo-gallery">
+        {% for photo in photos %}
+            <div class="photo">
+                <img src="{{ url_for('show_photo', photo_id=photo['_id']) }}" alt="Photo">
+                <p> Uploaded by: {{ photo.user_name }}</p>
+                <!-- <p>Upload Date: {{ photo.upload_date }}</p>  -->
+
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
+
+
+
+ <!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Photos</title>
+    <style>
+        .photo {
+            margin-bottom: 20px;
+        }
+        .photo img {
+            max-width: 300px;  /* Set maximum width */
+            max-height: 300px; /* Set maximum height */
+        }
+    </style>
+</head>
+<body>
+    <h1>All Photos</h1>
+    <button onclick="sortPhotos()">Sort by User Name</button>
+    <div class="photo-gallery">
+        {% for photo in photos %}
+            <div class="photo">
+                <img src="{{ url_for('show_photo', photo_id=photo['_id']) }}" alt="Photo">
+                <p>Uploader: {{ photo.user_name }}</p>
+                <p>Upload Date: {{ photo.upload_date }}</p> 
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function sortPhotos() {
+            var photoGallery = document.querySelector('.photo-gallery');
+            var photos = photoGallery.querySelectorAll('.photo');
+
+            // Convert NodeList to Array for sorting
+            photos = Array.from(photos);
+
+            // Sort photos based on uploader's name
+            photos.sort(function(a, b) {
+                var uploaderA = a.querySelector('p').innerText.split(': ')[1];
+                var uploaderB = b.querySelector('p').innerText.split(': ')[1];
+                return uploaderA.localeCompare(uploaderB);
+            });
+
+            // Remove existing photos
+            photoGallery.innerHTML = '';
+
+            // Append sorted photos
+            photos.forEach(function(photo) {
+                photoGallery.appendChild(photo);
+            });
+        }
+    </script>
+</body>
+</html> -->
+
